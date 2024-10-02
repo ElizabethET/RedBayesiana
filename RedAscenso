@@ -1,0 +1,133 @@
+from pomegranate.distributions import Categorical, ConditionalCategorical
+from pomegranate.bayesian_network import BayesianNetwork
+from torch.masked import MaskedTensor
+from torch import tensor, as_tensor
+#Elimina el warning de MaskedTensor, ya que este está en fase de prototipo; no afecta a su ejecución.
+import warnings
+warnings.filterwarnings('ignore', category=UserWarning, module="torch.masked")
+
+educacion = Categorical(
+    [[
+      0.3, 
+      0.4, 
+      0.3
+    ]]
+)
+
+
+edad = Categorical(
+    [[
+      0.4, 
+      0.4, 
+      0.2
+    ]] 
+)
+
+
+experiencia = ConditionalCategorical(
+    [[
+        # baja
+        [0.6, 0.3, 0.1],  # joven
+        [0.4, 0.4, 0.2],  # adulto
+        [0.3, 0.4, 0.3],  # mayor
+    
+        # media
+        [0.3, 0.5, 0.2],  # joven
+        [0.2, 0.5, 0.3],  # adulto
+        [0.15, 0.45, 0.4], # mayor
+   
+        # alta
+        [0.1, 0.4, 0.5],  # joven
+        [0.1, 0.3, 0.6],  # adulto
+        [0.1, 0.3, 0.6], # mayor
+    ]]
+)
+
+desempeño = Categorical(
+    [[
+      0.2, 
+      0.5, 
+      0.3
+    ]]
+)
+
+
+ascenso = ConditionalCategorical(
+    [[
+        # bajo
+        [0.8, 0.2],  # poca
+        [0.7, 0.3],  # moderada
+        [0.6, 0.4],   # mucha
+    
+        # medio
+        [0.6, 0.4],  # poca
+        [0.4, 0.6],  # moderada
+        [0.2, 0.8],   # mucha
+    
+        # alto
+        [0.4, 0.6],  # poca
+        [0.2, 0.8],  # moderada
+        [0.1, 0.9],   # mucha
+    ]]
+)
+
+
+#Creación red bayesiana
+modelo = BayesianNetwork()
+modelo.add_distributions([educacion, edad, experiencia, desempeño, ascenso])
+
+#Agregar conexiones
+modelo.add_edge(educacion, experiencia)
+modelo.add_edge(edad, experiencia)
+modelo.add_edge(experiencia, ascenso)
+modelo.add_edge(desempeño, ascenso)
+
+#Variables lingüísticas
+variables = {
+    "educacion": ["baja", "media", "alta"],
+    "edad": ["joven", "adulto", "mayor"],
+    "experiencia": ["poca", "moderada", "mucha"],
+    "desempeño": ["bajo", "medio", "alto"],
+    "ascenso": ["baja", "media", "alta"]
+}
+
+#Probabilidad de suceso particular
+probabilidad = modelo.probability(
+    as_tensor(
+        [[
+            variables["educacion"].index("baja"),
+            variables["edad"].index("joven"),
+            variables["experiencia"].index("moderada"),
+            variables["desempeño"].index("medio"),
+            variables["ascenso"].index("media"),
+        ]]
+    )
+)
+print("\nProbabilidad de suceso particular:", probabilidad.item())
+
+#Probabilidad de sucesos basados en una observación
+observaciones = tensor(
+    [[
+        variables['educacion'].index("baja"), #-1 es que no hay observación
+        variables['edad'].index("joven"),
+        variables['desempeño'].index("alto"),
+        -1,
+        -1,
+    ]]
+)
+
+#Máscara con True y False de los sucesos observados
+observaciones_masked = MaskedTensor(observaciones, mask=(observaciones != -1))
+
+#Predicciones de las variables basados en la observación
+prediciones = modelo.predict_proba(observaciones_masked)
+
+#Print bonito
+print("\nProbabilidad de sucesos basados en una observación:")
+for (nombre, valor), pred in zip(variables.items(), prediciones):
+    if isinstance(pred, str):
+        print(f"{nombre}: {pred}")
+    else:
+        print(f"{nombre}")
+        for valor, prob in zip(valor, pred[0]):
+            print(f"    {valor}: {prob:.4f}")
