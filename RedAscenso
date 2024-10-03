@@ -43,7 +43,7 @@ experiencia = ConditionalCategorical(
         [
         [0.1, 0.4, 0.5],  # joven
         [0.1, 0.3, 0.6],  # adulto
-        [0.1, 0.3, 0.6], # mayor
+        [0.05, 0.3, 0.65], # mayor
         ],
     ]]
 )
@@ -61,21 +61,21 @@ ascenso = ConditionalCategorical(
     [[
         # bajo
         [
-        [0.8, 0.2],  # poca
-        [0.7, 0.3],  # moderada
-        [0.6, 0.4],   # mucha
+        [0.8, 0.15, 0.05],  # poca
+        [0.7, 0.2,0.1],  # moderada
+        [0.6, 0.3, 0.1],   # mucha
         ],
         # medio
         [
-        [0.6, 0.4],  # poca
-        [0.4, 0.6],  # moderada
-        [0.2, 0.8],   # mucha
+        [0.6, 0.3,0.1],  # poca
+        [0.4, 0.4,0.2],  # moderada
+        [0.2, 0.5, 0.3],   # mucha
         ],
         # alto
         [
-        [0.4, 0.6],  # poca
-        [0.2, 0.8],  # moderada
-        [0.1, 0.9],   # mucha
+        [0.4, 0.4, 0.2],  # poca
+        [0.2, 0.5,0.3],  # moderada
+        [0.1, 0.3, 0.6],   # mucha
         ],
     ]]
 )
@@ -104,7 +104,7 @@ variables = {
 probabilidad = modelo.probability(
     as_tensor(
         [[
-            variables["educacion"].index("baja"),
+            variables["educacion"].index("alta"),
             variables["edad"].index("joven"),
             variables["experiencia"].index("moderada"),
             variables["desempeño"].index("medio"),
