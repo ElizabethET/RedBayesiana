@@ -26,20 +26,25 @@ edad = Categorical(
 
 experiencia = ConditionalCategorical(
     [[
-        # baja
+        # poca
+        [
         [0.6, 0.3, 0.1],  # joven
         [0.4, 0.4, 0.2],  # adulto
         [0.3, 0.4, 0.3],  # mayor
-    
-        # media
+        ],
+        
+        # moderada
+        [
         [0.3, 0.5, 0.2],  # joven
         [0.2, 0.5, 0.3],  # adulto
         [0.15, 0.45, 0.4], # mayor
-   
-        # alta
+        ],
+        # mucha
+        [
         [0.1, 0.4, 0.5],  # joven
         [0.1, 0.3, 0.6],  # adulto
         [0.1, 0.3, 0.6], # mayor
+        ],
     ]]
 )
 
@@ -55,19 +60,23 @@ desempeño = Categorical(
 ascenso = ConditionalCategorical(
     [[
         # bajo
+        [
         [0.8, 0.2],  # poca
         [0.7, 0.3],  # moderada
         [0.6, 0.4],   # mucha
-    
+        ],
         # medio
+        [
         [0.6, 0.4],  # poca
         [0.4, 0.6],  # moderada
         [0.2, 0.8],   # mucha
-    
+        ],
         # alto
+        [
         [0.4, 0.6],  # poca
         [0.2, 0.8],  # moderada
         [0.1, 0.9],   # mucha
+        ],
     ]]
 )
 
@@ -91,7 +100,7 @@ variables = {
     "ascenso": ["baja", "media", "alta"]
 }
 
-#Probabilidad de suceso particular
+# Probabilidad de suceso particular
 probabilidad = modelo.probability(
     as_tensor(
         [[
@@ -105,7 +114,7 @@ probabilidad = modelo.probability(
 )
 print("\nProbabilidad de suceso particular:", probabilidad.item())
 
-#Probabilidad de sucesos basados en una observación
+# Probabilidad de sucesos basados en una observación
 observaciones = tensor(
     [[
         variables['educacion'].index("baja"), #-1 es que no hay observación
